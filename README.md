@@ -1,26 +1,26 @@
 # EdgeVision
 
-IHA goruntulerinde nesne tespiti yapan, uc cihazlarda calisacak sekilde optimize edilmis bir Edge AI platformu.
+**Intelligent Aerial Perception & Edge AI Platform**
 
-## Proje Ozeti
+## Projenin Amacı
 
-Bu proje, VisDrone veri seti uzerinde YOLOv8n ve YOLOv8s modellerini egitip, bu modelleri dort farkli formatta (PyTorch, ONNX FP32, ONNX FP16, ONNX INT8) karsilastirir. Amac, uc cihazlarda (edge) hangi model ve format kombinasyonunun en verimli oldugunu olcmektir.
+Bu proje, İHA'lardan (İnsansız Hava Araçları) alınan yüksek çözünürlüklü görüntülerde insan, araç ve diğer nesneleri tespit edebilen; ancak bunu yaparken yüksek işlem gücüne sahip sunuculara bağımlı kalmayan, aksine kaynakları kısıtlı uç cihazlarda (Edge AI) maksimum verimlilikle çalışmayı hedefleyen bir yapay zekâ platformudur.
 
-Proje yalnizca bir YOLO egitimi degildir. Gercek zamanli video cikarimi, edge cihaz simulasyonu, kucuk nesne analizi, isik kosullari analizi, FastAPI backend ve React dashboard icerir.
+Bizim için mesele sadece bir YOLO modelini eğitip yüksek doğruluk (mAP) almak değil; aynı zamanda o modelin gecikmesini (latency), saniyedeki kare hızını (FPS), bellek tüketimini ve farklı donanım formatlarındaki (FP32, FP16, INT8, TensorRT) davranışını bilimsel ve ölçülebilir deneylerle analiz etmektir.
 
-## Temel Bulgu
+## Çözdüğümüz Problem
 
-YOLOv8n FP16 modeli, edge simulasyonunda (1 CPU thread) FP32 modelinden 2 kat daha hizli ve cok daha stabil calisir:
+Yüksek işlem gücüne sahip bir bilgisayarda yüksek doğrulukla çalışan bir model, düşük kaynaklı bir uç cihazda aynı performansı göstermeyebilir. Model yüksek FPS'e ulaşamayabilir, bellek tüketimi artabilir, görüntü işleme gecikebilir veya küçük/uzaktaki nesneler kaçırılabilir.
 
-| Format | Boyut | FPS | P95 Gecikme | mAP50 |
-|---|---|---|---|---|
-| FP32 | 12.19 MB | 4.66 | 737.8 ms | 0.2658 |
-| FP16 | 6.13 MB | 9.04 | 123.2 ms | 0.2655 |
-| INT8 | 3.32 MB | 1.29 | 1300.7 ms | 0.2545 |
+Bu projede, bu problemleri karşılaştırmalı benchmark'lar, parçalı çıkarım (tile inference) ve donanım hızlandırma teknikleriyle çözmeyi hedefliyoruz.
 
-FP16, dogruluk kaybi olmadan boyutu yariya indirir, hizi 2 kat artirir ve gecikmeyi stabil hale getirir.
+## Öne Çıkan Teknik Bulgular
 
-## Karsilastirma Tablosu
+1. FP16, Edge Cihazlarda FP32'den 2 Kat Daha Hızlı ve Stabil: Uç cihaz simülasyonunda (1 CPU thread) FP32 modeli 4.66 FPS alırken ve gecikmesi 737 ms'ye kadar çıkarken (tutarsız), FP16 modeli 9.04 FPS hızında ve 123 ms stabil bir gecikmeyle çalışmıştır.
+2. INT8 Dinamik Kuantalama, VNNI Olmayan CPU'larda Yavaşlatıyor: Model boyutunu %72 küçültmesine rağmen, donanımsal VNNI desteği olmayan genel amaçlı CPU'larda INT8 model, dekuantalizasyon maliyeti nedeniyle hızı düşürmektedir.
+3. VisDrone'da Küçük Nesne Sorunu Hâlâ Ciddi: Büyük nesnelerde mAP50 0.535 iken, küçük nesnelerde bu oran 0.168'e kadar düşmektedir. Bu sorunu aşmak için projede Tile-Based Inference (SAHI) mimarisi desteklenmektedir.
+
+## Karşılaştırma Tablosu
 
 | Model | Format | Boyut (MB) | mAP50 | FPS (CPU) | FPS (Edge) |
 |---|---|---|---|---|---|
@@ -33,31 +33,23 @@ FP16, dogruluk kaybi olmadan boyutu yariya indirir, hizi 2 kat artirir ve gecikm
 | YOLOv8s | ONNX FP16 | 21.38 | 0.3491 | 2.82 | - |
 | YOLOv8s | ONNX INT8 | 10.96 | 0.3401 | 0.43 | 0.45 |
 
-## Bilimsel Bulgular
+## Geliştirilen Özellikler
 
-1. FP16, edge cihazda FP32'den 2 kat hizli. Edge simulasyonunda 9.04 FPS vs 4.66 FPS. P95 gecikme 123 ms vs 737 ms.
-2. INT8, VNNI komut seti olmayan CPU'larda yavaslatiyor. YOLOv8n 7.25 FPS'ten 1.23 FPS'e dusuyor.
-3. Quantization kaybi model boyutuna gore degisiyor. YOLOv8n INT8 kaybi %7.6, YOLOv8s INT8 kaybi %4.3.
-4. Kucuk nesneler VisDrone'da hala zayif. Buyuk nesnelerde mAP50 0.535, kucuk nesnelerde 0.168.
-5. VisDrone'un yarisi zorlu isik kosullarinda. 548 goruntunun 272'si alacakaranlik, 254'u gunduz, 22'si gece.
+- Data Pipeline: VisDrone veri seti yönetimi.
+- Object Detection: YOLOv8 ailesi (n ve s modelleri).
+- Model Benchmark: Farklı formatların doğruluk, hız ve bellek karşılaştırması.
+- Edge Optimization: ONNX FP32/FP16/INT8 and TensorRT Export.
+- Real-Time Inference: Video üzerinden gerçek zamanlı tespit ve FPS ölçümü.
+- Advanced Inference: Tile-Based Inference (SAHI) ile küçük nesne kaybını azaltma.
+- Monitoring: Prometheus formatında /metrics endpoint'i.
+- API: FastAPI ile asenkron çıkarım servisi.
+- Dashboard: React + TypeScript ile görselleştirme.
+- Deployment: Docker Compose ile tek komutta kalkış.
 
-## Gorseller
-
-Model boyutu ve dogruluk iliskisi:
-![Boyut vs mAP](results/figures/size_vs_map.png)
-
-Normal CPU ve edge simulasyonu karsilastirmasi:
-![Edge simulation](results/figures/edge_simulation.png)
-
-Kucuk nesne analizi:
-![Small object](results/figures/small_object_analysis.png)
-
-## Hizli Baslangic
-
-Docker ile calistirma:
+## Hızlı Başlangıç
 
 ```bash
-git clone https://github.com/KULLANICI_ADIN/EdgeVision.git
+git clone https://github.com/almina-nur/EdgeVision.git
 cd EdgeVision
 docker compose up --build
 ```

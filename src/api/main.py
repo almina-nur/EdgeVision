@@ -10,7 +10,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pandas as pd
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile, Response
+from prometheus_client import generate_latest, Counter, Histogram
 from fastapi.middleware.cors import CORSMiddleware
 
 from .model_loader import DetectionModel
@@ -18,6 +19,11 @@ from .schemas import PredictionResponse
 
 MODEL_PATH = os.getenv("MODEL_PATH", "models/yolov8n_fp16.onnx")
 model = None
+
+# Prometheus Metrikleri
+REQUEST_COUNT = Counter("edgevision_requests_total", "Toplam istek sayisi", ["endpoint"])
+REQUEST_LATENCY = Histogram("edgevision_request_latency_seconds", "Istek gecikmesi", ["endpoint"])
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -28,6 +34,11 @@ async def lifespan(app: FastAPI):
     print("Model hazır.")
     yield
     model = None
+
+# Prometheus Metrikleri
+REQUEST_COUNT = Counter("edgevision_requests_total", "Toplam istek sayisi", ["endpoint"])
+REQUEST_LATENCY = Histogram("edgevision_request_latency_seconds", "Istek gecikmesi", ["endpoint"])
+
 
 app = FastAPI(title="EdgeVision API", version="1.0.0", lifespan=lifespan)
 
@@ -68,13 +79,21 @@ def stats():
 
     return results
 
+
+@app.get("/metrics")
+def metrics():
+    """Prometheus formatında uç nokta."""
+    return Response(content=generate_latest(), media_type="text/plain")
+
 @app.post("/predict", response_model=PredictionResponse)
 async def predict(file: UploadFile = File(...)):
     """Yüklenen görüntü üzerinde nesne tespiti yapar."""
-    if model is None:
-        raise HTTPException(status_code=503, detail="Model yüklenmedi")
-        
-    contents = await file.read()
+    REQUEST_COUNT.labels(endpoint="/predict").inc()
+    with REQUEST_LATENCY.labels(endpoint="/predict").time():
+        if model is None:
+            raise HTTPException(status_code=503, detail="Model yüklenmedi")
+            
+        contents = await file.read()
     nparr = np.frombuffer(contents, np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     
