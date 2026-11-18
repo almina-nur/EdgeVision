@@ -58,3 +58,18 @@ python download_models.py
 
 # 4. Launch everything
 docker compose up --build
+
+flowchart LR
+    U([User]) --> FE[React + TypeScript<br/>dashboard]
+    FE -->|HTTP| API[FastAPI backend]
+
+    subgraph Inference
+        API --> PRE[Preprocess] --> ORT[ONNX Runtime<br/>YOLOv8] --> POST[Postprocess + NMS]
+    end
+
+    POST --> API
+    API --> DB[(PostgreSQL)]
+    API -->|tracking| ML[MLflow]
+    ML --> DB
+    PROM[Prometheus] -->|scrapes /metrics| API
+    GRAF[Grafana] --> PROM
