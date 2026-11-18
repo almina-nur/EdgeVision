@@ -8,7 +8,25 @@ services:
       POSTGRES_DB: edgevision
     ports:
       - "5432:5432"
+      prometheus:
+    image: prom/prometheus
+    container_name: edgevision-prometheus
+    ports:
+      - "9090:9090"
     volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - backend
+
+  grafana:
+    image: grafana/grafana
+    container_name: edgevision-grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+
+volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
@@ -20,7 +38,25 @@ services:
     environment:
       MLFLOW_BACKEND_STORE_URI: postgresql://edgevision:edgevision@postgres:5432/edgevision
       MLFLOW_DEFAULT_ARTIFACT_ROOT: /mlflow/artifacts
+      prometheus:
+    image: prom/prometheus
+    container_name: edgevision-prometheus
+    ports:
+      - "9090:9090"
     volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - backend
+
+  grafana:
+    image: grafana/grafana
+    container_name: edgevision-grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+
+volumes:
       - mlflow_artifacts:/mlflow/artifacts
     command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri postgresql://edgevision:edgevision@postgres:5432/edgevision --default-artifact-root /mlflow/artifacts
     depends_on:
@@ -33,7 +69,25 @@ services:
     container_name: edgevision-backend
     ports:
       - "8000:8000"
+      prometheus:
+    image: prom/prometheus
+    container_name: edgevision-prometheus
+    ports:
+      - "9090:9090"
     volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - backend
+
+  grafana:
+    image: grafana/grafana
+    container_name: edgevision-grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+
+volumes:
       - ./models:/app/models:ro
     restart: unless-stopped
 
