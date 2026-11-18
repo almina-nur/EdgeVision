@@ -5,7 +5,7 @@
 
 ### 🛰️ EdgeVision: Havadan Algılama ve Kenar Yapay Zekası
 <p align="center">
-  <img src="assets/hero_banner.png" alt="EdgeVision Banner" width="100%">
+  <!-- Hero banner henüz eklenmedi -->
 </p>
 
 ### 📊 Benchmark ve Performans Analizi
@@ -20,14 +20,14 @@
 *Modelin VisDrone veri seti üzerindeki gerçek tespitleri.*
 
 <p align="center">
-  <img src="assets/inference_example.jpg" alt="Inference Example" width="100%">
+  <img src="assets/test_image.jpg" alt="Inference Example" width="100%">
 </p>
 
 ### 💻 Web Dashboard ve Arayüz
 *React ve TypeScript ile geliştirilen, kullanıcı dostu arayüz.*
 
 <p align="center">
-  <img src="assets/dashboard_screenshot.png" alt="Dashboard" width="100%">
+  <!-- Dashboard görseli henüz eklenmedi -->
 </p>
 
 ---
