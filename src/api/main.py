@@ -35,8 +35,6 @@ async def lifespan(app: FastAPI):
     yield
     model = None
 
-# Prometheus Metrikleri
-REQUEST_LATENCY = Histogram("edgevision_request_latency_seconds", "Istek gecikmesi", ["endpoint"])
 
 
 app = FastAPI(title="EdgeVision API", version="1.0.0", lifespan=lifespan)
