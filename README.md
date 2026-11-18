@@ -1,329 +1,60 @@
+%%writefile README.md
+<div align="center">
+
+# 🛰️ EdgeVision
+
+**Aerial small-object detection, benchmarked honestly for the edge.**
+
+YOLOv8 · ONNX (FP32 / FP16 / INT8) · FastAPI · React + TypeScript · PostgreSQL · MLflow · Prometheus
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![ONNX Runtime](https://img.shields.io/badge/ONNX-Runtime-005CED?logo=onnx&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/React-TypeScript-61DAFB?logo=react&logoColor=black)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+
+[Quick start](#-quick-start) · [Results](#-results) · [Architecture](#-architecture) · [Roadmap](#-roadmap) · [Türkçe](README.tr.md)
+
+<img src="assets/test_image.jpg" alt="EdgeVision detections on a VisDrone image" width="85%">
+
+</div>
 
 ---
 
-## 📸 Görsel Vitrin (Visual Showcase)
+## Why this project exists
 
-### 🛰️ EdgeVision: Havadan Algılama ve Kenar Yapay Zekası
-<p align="center">
-  <!-- Hero banner henüz eklenmedi -->
-</p>
+A model that scores well on a workstation GPU often falls apart on a resource-constrained device: lower FPS, unstable latency, higher memory use, and small, distant objects slipping through. This is especially true for drone imagery.
 
-### 📊 Benchmark ve Performans Analizi
-*Edge cihazlarda farklı formatların (FP32, FP16, INT8) performans karşılaştırması.*
+EdgeVision is an engineering study of that gap. Instead of only chasing mAP on [VisDrone](https://github.com/VisDrone/VisDrone-Dataset), it measures **accuracy, latency, FPS, and model size together**, across model variants and numeric precisions, and reports negative results too.
 
-<p align="center">
-  <img src="results/figures/edge_simulation.png" alt="Edge Simulation" width="48%">
-  <img src="results/figures/size_vs_map.png" alt="Size vs mAP" width="48%">
-</p>
+## ✨ Highlights
 
-### 🎯 Gerçek Tespit Sonuçları (Inference)
-*Modelin VisDrone veri seti üzerindeki gerçek tespitleri.*
-
-<p align="center">
-  <img src="assets/test_image.jpg" alt="Inference Example" width="100%">
-</p>
-
-### 💻 Web Dashboard ve Arayüz
-*React ve TypeScript ile geliştirilen, kullanıcı dostu arayüz.*
-
-<p align="center">
-  <!-- Dashboard görseli henüz eklenmedi -->
-</p>
-
----
-
-# EdgeVision
-### Intelligent Aerial Perception & Edge AI Platform
-
-An edge-oriented computer vision platform focused on aerial object detection, deep learning model optimization, and performance evaluation in resource-constrained environments.
-
-<p align="center">
-
-**YOLOv8 | PyTorch | ONNX | FastAPI | React | TypeScript | Docker**
-
-</p>
-
----
-
-## Overview
-
-EdgeVision is an experimental Edge AI platform designed to investigate the challenges of deploying deep learning-based object detection systems in resource-constrained environments.
-
-The project focuses on aerial imagery and explores the trade-offs between detection accuracy, inference latency, model size, and computational efficiency.
-
-By combining YOLOv8-based object detection models with ONNX deployment configurations, EdgeVision provides an experimental environment for evaluating different model optimization strategies.
-
-### Main Objectives
-
-- Develop an aerial object detection pipeline.
-- Evaluate YOLOv8 model architectures.
-- Compare FP32, FP16, and INT8 inference configurations.
-- Investigate model optimization for edge environments.
-- Analyze accuracy, latency, FPS, and model size.
-- Provide a web-based interface for inference and visualization.
-- Explore hardware-aware deployment strategies.
-
----
-
-## Key Features
-
-| Feature | Description |
+| | |
 |---|---|
-| Object Detection | YOLOv8-based object detection |
-| Model Conversion | PyTorch to ONNX |
-| Precision Evaluation | FP32, FP16, and INT8 |
-| Performance Benchmarking | FPS and inference latency |
-| Image Processing | Computer vision preprocessing and postprocessing |
-| REST API | FastAPI-based backend |
-| Web Interface | React and TypeScript |
-| Containerization | Docker-based deployment |
+| 🎯 **Detection** | YOLOv8n / YOLOv8s trained on VisDrone |
+| ⚙️ **Export & quantization** | PyTorch → ONNX FP32, FP16 and INT8 (dynamic) |
+| 📊 **Benchmarking** | mAP50, FPS, latency and memory per format, plus class-level and lighting-condition analysis |
+| 🌐 **Web dashboard** | Upload an image, see boxes drawn on a canvas, browse benchmark tables |
+| 🔌 **REST API** | FastAPI service with interactive docs and a health endpoint |
+| 🧪 **MLOps stack** | PostgreSQL + MLflow for experiment tracking |
+| 📈 **Observability** | Prometheus `/metrics` endpoint and a Grafana dashboard |
+| 🐳 **One-command deploy** | Docker Compose for the whole stack |
 
----
+## 🚀 Quick start
 
-## System Architecture
-
-EdgeVision follows a modular client-server architecture.
-
-```mermaid
-flowchart TD
-    A[User] --> B[React Frontend]
-    B --> C[FastAPI Backend]
-    C --> D[Image Preprocessing]
-    D --> E[ONNX Runtime]
-    E --> F[YOLOv8 Model]
-    F --> G[Postprocessing]
-    G --> H[Detection Results]
-    H --> B
-```
-
-### Technology Stack
-
-| Component | Technology |
-|---|---|
-| Programming Language | Python |
-| Deep Learning | PyTorch |
-| Object Detection | YOLOv8 |
-| Computer Vision | OpenCV |
-| Model Format | ONNX |
-| Inference Runtime | ONNX Runtime |
-| Backend | FastAPI |
-| Frontend | React, TypeScript |
-| Deployment | Docker, Docker Compose |
-
----
-
-## Model Performance & Benchmarking
-
-A major part of EdgeVision is the evaluation of different model configurations.
-
-The experiments investigate the effects of model architecture and numerical precision on inference performance.
-
-### CPU Benchmark Results
-
-The following results were obtained using a single-thread CPU edge simulation.
-
-| Model | FP32 FPS | FP16 FPS | INT8 FPS |
-|---|---:|---:|---:|
-| YOLOv8n | 7.25 | 8.93 | 1.23 |
-| YOLOv8s | 2.81 | 2.82 | 0.43 |
-
-### Accuracy Evaluation
-
-| Model | Format | mAP50 |
-|---|---|---:|
-| YOLOv8n | FP32 | 0.2658 |
-| YOLOv8n | FP16 | 0.2655 |
-| YOLOv8n | INT8 | 0.2545 |
-| YOLOv8s | FP32 | 0.3523 |
-| YOLOv8s | INT8 | 0.3401 |
-
-### Experimental Findings
-
-**1. FP16 Optimization**
-
-FP16 achieved higher inference throughput than FP32 for YOLOv8n in the reported CPU experiment.
-
-**2. INT8 Quantization**
-
-INT8 reduced model size considerably, but the current implementation did not produce a speed improvement on the tested CPU configuration.
-
-**3. Accuracy vs. Efficiency**
-
-YOLOv8s achieved higher mAP50 than YOLOv8n, while requiring more computational resources.
-
-**4. Deployment Considerations**
-
-Model size reduction does not necessarily translate into lower inference latency. Optimization strategies must be evaluated on the target hardware.
-
-> **Benchmarking disclaimer:** These measurements were obtained through single-thread CPU simulation. They are not Jetson Orin Nano hardware measurements. Actual edge-device performance remains subject to hardware validation.
-
----
-
-## Small Object Detection
-
-Aerial imagery introduces additional challenges due to object scale, image resolution, and scene density.
-
-Current experiments indicate a significant performance gap between large and small object detection.
-
-| Object Category | mAP50 |
-|---|---:|
-| Large Objects | 0.535 |
-| Small Objects | 0.168 |
-
-Potential improvement strategies include:
-
-- Higher input image resolution.
-- Small-object-oriented data augmentation.
-- SAHI-based sliced inference.
-- Adaptive image tiling.
-- P2 detection heads.
-- Improved postprocessing and NMS strategies.
-
-These approaches are planned for further experimentation.
-
----
-
-## Project Structure
-
-The repository is organized into separate components for model development, inference, frontend visualization, and experimental results.
-
-```text
-EdgeVision/
-├── frontend/
-├── models/
-├── results/
-├── src/
-├── tests/
-├── ARCHITECTURE.md
-├── GETTING_STARTED.md
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-├── README.md
-└── README.tr.md
-```
-
----
-
-## Getting Started
-
-### Prerequisites
-
-- Git
-- Docker
-- Docker Compose
-- Python (for model download and auxiliary scripts)
-
-### 1. Clone the Repository
+**Requirements:** Git, Docker with Compose, and Python 3 (only for the model download script).
 
 ```bash
+# 1. Clone
 git clone https://github.com/almina-nur/EdgeVision.git
 cd EdgeVision
-```
 
-### 2. Download Models
+# 2. Configure secrets (never commit .env)
+cp .env.example .env        # then edit the passwords
 
-```bash
+# 3. Download trained models from the v0.1.0 release
 python download_models.py
-```
 
-### 3. Build and Run
-
-```bash
+# 4. Launch everything
 docker compose up --build
-```
-
-### 4. Access the Application
-
-| Service | Address |
-|---|---|
-| Frontend | http://localhost:3000 |
-| Backend API | http://localhost:8000 |
-| API Documentation | http://localhost:8000/docs |
-| Health Endpoint | http://localhost:8000/health |
-
-To stop the application:
-
-```bash
-docker compose down
-```
-
----
-
-## Experimental Limitations
-
-EdgeVision is an ongoing research and engineering project.
-
-The current experimental scope has several limitations:
-
-- Edge performance measurements are based on CPU simulation.
-- Jetson Orin Nano hardware validation has not yet been completed.
-- Current INT8 inference performance requires further optimization.
-- Small-object detection remains a significant challenge.
-- Real-world performance may differ depending on hardware, runtime, preprocessing, and postprocessing overhead.
-
-These limitations are important considerations for interpreting the reported results.
-
----
-
-## Development Roadmap
-
-- [ ] Validate inference performance on actual edge hardware.
-- [ ] Integrate NVIDIA TensorRT.
-- [ ] Evaluate FP16 GPU inference.
-- [ ] Implement calibrated static INT8 quantization.
-- [ ] Improve small-object detection performance.
-- [ ] Investigate adaptive tiling and SAHI.
-- [ ] Optimize preprocessing and postprocessing.
-- [ ] Improve asynchronous inference architecture.
-- [ ] Expand automated testing.
-- [ ] Introduce experiment tracking with MLflow.
-- [ ] Improve Docker security and deployment reliability.
-- [ ] Develop reproducible hardware benchmarks.
-
----
-
-## Documentation
-
-- [Architecture](ARCHITECTURE.md)
-- [Getting Started](GETTING_STARTED.md)
-- [Turkish Documentation](README.tr.md)
-
----
-
-## Project Focus
-
-EdgeVision aims to explore practical engineering challenges in Edge AI and aerial computer vision.
-
-Its primary focus areas are:
-
-- Deep learning-based object detection.
-- Model compression and optimization.
-- Hardware-aware inference.
-- Accuracy-latency trade-offs.
-- Edge deployment.
-- Reproducible benchmarking.
-
----
-
-## License
-
-See the repository's LICENSE file for licensing information.
-
----
-
-<p align="center">
-
-**EdgeVision**
-
-Intelligent Aerial Perception & Edge AI Platform
-
-*Exploring efficient computer vision at the edge.*
-
-</p>
-
-
-## Roadmap (Planned)
-- [ ] MLflow and PostgreSQL integration (code exists, docker-compose ready)
-- [ ] TensorRT testing on actual Jetson hardware
-- [ ] Static INT8 quantization (QDQ format)
