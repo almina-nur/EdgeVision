@@ -6,6 +6,12 @@ export default defineConfig({
   resolve: {
     dedupe: ['react', 'react-dom'],
   },
+  // HATA ÇÖZÜMÜ: esbuild'i daha yeni bir hedefe zorla
+  optimizeDeps: {
+    esbuildOptions: {
+      target: 'esnext',
+    },
+  },
   build: {
     commonjsOptions: {
       transformMixedEsModules: true,
