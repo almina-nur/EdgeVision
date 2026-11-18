@@ -36,7 +36,6 @@ async def lifespan(app: FastAPI):
     model = None
 
 # Prometheus Metrikleri
-REQUEST_COUNT = Counter("edgevision_requests_total", "Toplam istek sayisi", ["endpoint"])
 REQUEST_LATENCY = Histogram("edgevision_request_latency_seconds", "Istek gecikmesi", ["endpoint"])
 
 
