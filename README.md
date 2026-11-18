@@ -287,3 +287,9 @@ Intelligent Aerial Perception & Edge AI Platform
 *Exploring efficient computer vision at the edge.*
 
 </p>
+
+
+## Roadmap (Planned)
+- [ ] MLflow and PostgreSQL integration (code exists, docker-compose ready)
+- [ ] TensorRT testing on actual Jetson hardware
+- [ ] Static INT8 quantization (QDQ format)
