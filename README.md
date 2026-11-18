@@ -53,3 +53,12 @@ git clone https://github.com/almina-nur/EdgeVision.git
 cd EdgeVision
 docker compose up --build
 ```
+
+
+## Yol Haritası (Gelecek Çalışmalar)
+
+Rapor doğrultusunda öncelikli geliştirme adımları:
+- [ ] Gerçek donanım (Jetson Orin Nano) üzerinde TensorRT testleri.
+- [ ] MLflow ile deney takibi ve model versiyonlama.
+- [ ] Statik INT8 quantization ve QAT (Quantization Aware Training) karşılaştırması.
+- [ ] PostgreSQL ile çıkarım loglarının tutulması.

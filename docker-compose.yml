@@ -7,9 +7,15 @@ services:
     volumes:
       - ./models:/app/models:ro
     restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
   frontend:
     build: ./frontend
     container_name: edgevision-frontend
     ports: ["3000:80"]
     depends_on: [backend]
     restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
