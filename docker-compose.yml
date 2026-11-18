@@ -1,4 +1,31 @@
 services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: edgevision-postgres
+    environment:
+      POSTGRES_USER: edgevision
+      POSTGRES_PASSWORD: edgevision
+      POSTGRES_DB: edgevision
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.10.0
+    container_name: edgevision-mlflow
+    ports:
+      - "5000:5000"
+    environment:
+      MLFLOW_BACKEND_STORE_URI: postgresql://edgevision:edgevision@postgres:5432/edgevision
+      MLFLOW_DEFAULT_ARTIFACT_ROOT: /mlflow/artifacts
+    volumes:
+      - mlflow_artifacts:/mlflow/artifacts
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri postgresql://edgevision:edgevision@postgres:5432/edgevision --default-artifact-root /mlflow/artifacts
+    depends_on:
+      - postgres
+    restart: unless-stopped
   backend:
     build:
       context: .
