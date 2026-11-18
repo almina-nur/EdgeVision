@@ -62,3 +62,17 @@ Rapor doğrultusunda öncelikli geliştirme adımları:
 - [ ] MLflow ile deney takibi ve model versiyonlama.
 - [ ] Statik INT8 quantization ve QAT (Quantization Aware Training) karşılaştırması.
 - [ ] PostgreSQL ile çıkarım loglarının tutulması.
+
+## 🐳 Docker ile Çalışan Kurulum (Test Edildi)
+
+### Gereksinimler
+- Docker Desktop (Windows/Mac) veya Docker Engine (Linux)
+- Docker Compose v2
+
+### Tek Komutla Başlatma
+
+```bash
+git clone https://github.com/almina-nur/EdgeVision.git
+cd EdgeVision
+docker compose up --build
+```

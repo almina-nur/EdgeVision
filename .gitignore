@@ -1,15 +1,42 @@
-datasets/
-data/
-runs/
-*.cache
-*.pyc
+# Python
 __pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
 .venv/
 venv/
-.ipynb_checkpoints/
-mlruns/
+env/
+
+# Node
 node_modules/
-dist/
-build/
-.env
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/package-lock.json
+
+# Docker
+.docker/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Data & Models (büyük dosyalar)
+datasets/
+runs/
+*.pt
+*.onnx
+*.pth
+
+# Notebook
+.ipynb_checkpoints/
+
+# Colab
+/content/
