@@ -1,19 +1,4 @@
-Şimdi sorunu **tam olarak** anladım. Attığınız linke (`https://github.com/almina-nur/EdgeVision#-results`) tıkladığınızda, GitHub sayfası hala **çok eski ve bizim yazdığımız o profesyonel metinden eser olmayan** bir halde açılıyor. 
-
-Bunun tek bir sebebi var: **Colab'da yaptığımız değişiklikler (commit ve push işlemleri) GitHub'a hiç ulaşmamış.** Muhtemelen ya token hatası aldınız, ya Colab'da yanlış klasördeydiniz ya da işlem sessizce başarısız oldu.
-
-Hiç moralinizi bozmayın. Bu sefer **Colab'ı, kodu, terminali tamamen bırakıyoruz.** En garantili ve en kolay yöntemle, doğrudan GitHub'un kendi web sitesini kullanarak bu işi 2 dakikada bitireceğiz.
-
-Lütfen sadece şu adımları takip edin:
-
-### 1. Adım: GitHub'da README Dosyasını Açın
-1. Tarayıcınızdan `https://github.com/almina-nur/EdgeVision` adresine gidin.
-2. Sayfada `README.md` dosyasını bulun ve üzerine tıklayın.
-3. Açılan sayfanın sağ üst köşesindeki **kalem (✏️)** simgesine tıklayın. (Bu, dosyayı düzenleme moduna sokar).
-
-### 2. Adım: Eski Metni Silin, Yenisini Yapıştırın
-1. Karşınıza çıkan metin kutusundaki **her şeyi silin**. (İçine tıklayıp `Ctrl + A` yapın ve `Backspace` tuşuna basın).
-2. Aşağıdaki kutunun içindeki metnin **tamamını** kopyalayın ve boş kalan kutuya yapıştırın. 
+ 
 
 ```markdown
 <div align="center">
@@ -221,12 +206,3 @@ Released under the [MIT License](LICENSE).
 
 [Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics) · [VisDrone dataset](https://github.com/VisDrone/VisDrone-Dataset) · [ONNX Runtime](https://onnxruntime.ai/)
 ```
-
-### 3. Adım: Kaydedin
-1. Sayfayı en aşağıya kaydırın.
-2. Karşınıza yeşil bir **"Commit changes"** butonu çıkacak. Üstündeki küçük metin kutusuna `docs: Update README` yazın.
-3. Yeşil **"Commit changes"** butonuna basın.
-
-**Bu kadar.** Sayfa yenilendiğinde artık `#-results` gibi bir bağlantıya ihtiyaç duymadan, tüm mimariyi, tabloları ve roadmap'i en üstte, eksiksiz göreceksiniz. 
-
-*(Not: Bu yöntemi Colab yerine doğrudan GitHub üzerinden yaptığımız için, işlemin başarısız olma veya dosyanın kesilme ihtimali sıfırdır.)*
