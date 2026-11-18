@@ -1,3 +1,37 @@
+
+---
+
+## 📸 Görsel Vitrin (Visual Showcase)
+
+### 🛰️ EdgeVision: Havadan Algılama ve Kenar Yapay Zekası
+<p align="center">
+  <img src="assets/hero_banner.png" alt="EdgeVision Banner" width="100%">
+</p>
+
+### 📊 Benchmark ve Performans Analizi
+*Edge cihazlarda farklı formatların (FP32, FP16, INT8) performans karşılaştırması.*
+
+<p align="center">
+  <img src="results/figures/edge_simulation.png" alt="Edge Simulation" width="48%">
+  <img src="results/figures/size_vs_map.png" alt="Size vs mAP" width="48%">
+</p>
+
+### 🎯 Gerçek Tespit Sonuçları (Inference)
+*Modelin VisDrone veri seti üzerindeki gerçek tespitleri.*
+
+<p align="center">
+  <img src="assets/inference_example.jpg" alt="Inference Example" width="100%">
+</p>
+
+### 💻 Web Dashboard ve Arayüz
+*React ve TypeScript ile geliştirilen, kullanıcı dostu arayüz.*
+
+<p align="center">
+  <img src="assets/dashboard_screenshot.png" alt="Dashboard" width="100%">
+</p>
+
+---
+
 # EdgeVision
 ### Intelligent Aerial Perception & Edge AI Platform
 
