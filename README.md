@@ -1,6 +1,4 @@
- 
 
-```markdown
 <div align="center">
 
 # 🛰️ EdgeVision
@@ -205,4 +203,3 @@ Released under the [MIT License](LICENSE).
 ## 🙏 Acknowledgements
 
 [Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics) · [VisDrone dataset](https://github.com/VisDrone/VisDrone-Dataset) · [ONNX Runtime](https://onnxruntime.ai/)
-```
