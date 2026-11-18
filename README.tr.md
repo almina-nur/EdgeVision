@@ -108,16 +108,11 @@ VisDrone veri setini de indirmek için: `python download_models.py --all`
 | YOLOv8s | ONNX FP16 | 21.38 | 0.3491 | 2.82 | – |
 | YOLOv8s | ONNX INT8 | 10.96 | 0.3401 | 0.43 | 0.45 |
 
-### Neler öğrendik?
+### Neler öğrendik? (ve nelerin daha fazla doğrulanması gerekiyor?)
 
-1. **FP16, CPU tarafındaki en iyi dengedir.** YOLOv8n için model boyutunu yarıya indirir, anlamlı bir mAP kaybı yaşatmaz ve 1 iş parçacıklı testte verimi neredeyse iki katına çıkarır.
-2. **Küçük olmak her zaman daha hızlı anlamına gelmez.** INT8 modeli yaklaşık %72 küçültür ancak burada daha *yavaş* çalışır. Mevcut INT8 modelleri, CPU'daki evrişimli ağlar için uygun olmayan dinamik niceleme kullanmaktadır. Kalibre edilmiş **statik (QDQ) niceleme** ve TensorRT, planlanan çözümlerdir.
-3. **Asıl sorun küçük nesnelerdir.** Büyük nesneler için mAP50 **0.535** iken, küçük nesneler için bu değer sadece **0.168**'dir.
-
-| Nesne boyutu | mAP50 |
-|---|---:|
-| Büyük | 0.535 |
-| Küçük | 0.168 |
+1. **CPU üzerinde FP16 vs FP32 durumu karmaşıktır.** İlk 1 iş parçacıklı testlerde YOLOv8n FP16 için umut vaat eden 2 kat hızlanma görülse de, bu sonuç model boyutları arasında ciddi farklılık göstermektedir (örneğin, YOLOv8s hiçbir hızlanma göstermemiştir). Bu durum, olası ölçüm gürültüsüne veya CPU tarafındaki FP16 yürütme kısıtlamalarına (ONNX Runtime genellikle FP16'yı FP32'ye geri dönüştürür) işaret eder. Kesin sonuçlara varmadan önce titiz bir doğrulama (n=30+ tekrar, p95/p99 gecikme) gereklidir. Gerçek FP16 kazanımları GPU/TensorRT üzerinde beklenmektedir.
+2. **INT8, Statik Niceleme gerektirir.** Dinamik INT8 niceleme, model boyutunu ~%72 küçültür ancak CPU'da çıkarımı önemli ölçüde yavaşlatır. Bu beklenen bir durumdur: dinamik niceleme, Evrişimli Sinir Ağları (CNN) için değil, MatMul/LSTM işlemleri için optimize edilmiştir. YOLO için doğru yaklaşım, temsili bir kalibrasyon veri seti ile **Statik PTQ (QDQ formatı)** ve nihayetinde GPU'da (örneğin Jetson Orin Nano) TensorRT INT8'dir.
+3. **Küçük nesneler hala darboğazdır.** Büyük nesneler için mAP50 **0.535** iken, küçük nesneler için bu değer sadece **0.168**'dir. SAHI (Döşemeli Çıkarım) potansiyel bir çözüm olsa da, gecikme maliyeti (çıkarım süresini döşeme sayısıyla çarpması) katı kenar cihaz bütçelerine karşı değerlendirilmelidir. Daha yüksek giriş çözünürlüğü (960px) ve uyarlanabilir döşeme gibi alternatifler planlanmaktadır.
 
 Sınıf düzeyi ve ışık koşulu analizleri [`results/`](results/) dizininde bulunmaktadır.
 
