@@ -108,16 +108,11 @@ To download the VisDrone dataset as well: `python download_models.py --all`
 | YOLOv8s | ONNX FP16 | 21.38 | 0.3491 | 2.82 | – |
 | YOLOv8s | ONNX INT8 | 10.96 | 0.3401 | 0.43 | 0.45 |
 
-### What we learned
+### What we learned (and what needs further validation)
 
-1. **FP16 is the best CPU-side trade-off.** For YOLOv8n it halves model size with no meaningful mAP loss and roughly doubled throughput in the 1-thread test, with steadier latency than FP32.
-2. **Smaller does not mean faster.** INT8 shrinks the model by about 72% but runs *slower* here. The current INT8 models use dynamic quantization, which is a poor fit for convolutional networks on CPU. Calibrated **static (QDQ) quantization** and TensorRT are the planned fix.
-3. **Small objects are the real problem.** mAP50 is **0.535** for large objects but only **0.168** for small ones.
-
-| Object size | mAP50 |
-|---|---:|
-| Large | 0.535 |
-| Small | 0.168 |
+1. **FP16 vs FP32 is nuanced on CPU.** While initial 1-thread tests showed a promising 2x speedup for YOLOv8n FP16, this result varies significantly across model sizes (e.g., YOLOv8s showed no speedup). This suggests potential measurement noise or architectural limitations in CPU-side FP16 execution (ONNX Runtime often casts FP16 back to FP32). Rigorous validation (n=30+, p95/p99 latency) is required before drawing firm conclusions. True FP16 gains are expected on GPU/TensorRT.
+2. **INT8 requires Static Quantization.** Dynamic INT8 quantization reduces model size by ~72% but significantly slows down inference on CPU. This is expected: dynamic quantization is optimized for MatMul/LSTM operations, not Convolutional Neural Networks. The correct approach for YOLO is **Static PTQ (QDQ format)** with a representative calibration dataset, and eventually TensorRT INT8 on GPU (e.g., Jetson Orin Nano).
+3. **Small objects remain the bottleneck.** mAP50 is **0.535** for large objects but only **0.168** for small ones. While SAHI (Sliced Inference) is a potential solution, its latency cost (multiplying inference time by the number of tiles) must be evaluated against strict edge budgets. Alternatives like higher input resolution (960px) and adaptive tiling are planned.
 
 Class-level and lighting-condition analyses live in [`results/`](results/).
 
