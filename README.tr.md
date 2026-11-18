@@ -1,3 +1,4 @@
+
 <div align="center">
 
 # 🛰️ EdgeVision
@@ -55,3 +56,150 @@ python download_models.py
 
 # 4. Her şeyi başlatın
 docker compose up --build
+```
+
+| Servis | URL |
+|---|---|
+| Panel (Dashboard) | http://localhost:3000 |
+| API | http://localhost:8000 |
+| API dokümanları (Swagger) | http://localhost:8000/docs |
+| Sağlık Durumu | http://localhost:8000/health |
+| Metrikler | http://localhost:8000/metrics |
+| MLflow | http://localhost:5000 |
+| Prometheus | http://localhost:9090 |
+| Grafana | http://localhost:3001 |
+
+Durdurmak için `docker compose down` (birimleri de silmek için `-v` ekleyin).
+
+<details>
+<summary><b>Yapılandırma</b></summary>
+
+| Değişken | Amaç | Varsayılan |
+|---|---|---|
+| `MODEL_PATH` | API tarafından sunulan ONNX modeli | `models/yolov8n_fp16.onnx` |
+| `DATABASE_URL` | PostgreSQL bağlantı dizesi | `.env` üzerinden oluşturulur |
+| `MLFLOW_TRACKING_URI` | MLflow takip sunucusu | `http://mlflow:5000` |
+| `POSTGRES_PASSWORD` | Veritabanı şifresi | **gerekli** |
+| `GRAFANA_PASSWORD` | Grafana yönetici şifresi | **gerekli** |
+
+VisDrone veri setini de indirmek için: `python download_models.py --all`
+
+</details>
+
+## 📊 Sonuçlar
+
+> ⚠️ **Önce bunu okuyun.** Tüm hız verileri **tek iş parçacıklı CPU simülasyonundan** elde edilmiştir, Jetson Orin Nano donanımından değil. Formatlar arası *göreceli* davranışı gösterirler, mutlak kenar cihaz performansını değil. Donanım doğrulaması [yol haritasında](#-yol-haritası).
+
+<table>
+<tr>
+<td width="50%"><img src="results/figures/edge_simulation.png" alt="Kenar simülasyonu: Format başına FPS"></td>
+<td width="50%"><img src="results/figures/size_vs_map.png" alt="Model boyutu ve mAP50 karşılaştırması"></td>
+</tr>
+</table>
+
+| Model | Format | Boyut (MB) | mAP50 | FPS (CPU) | FPS (1 iş parçacığı) |
+|---|---|---:|---:|---:|---:|
+| YOLOv8n | PyTorch | 6.18 | 0.2754 | – | – |
+| YOLOv8n | ONNX FP32 | 12.19 | 0.2658 | 7.25 | 4.66 |
+| YOLOv8n | ONNX FP16 | 6.13 | 0.2655 | 8.93 | 9.04 |
+| YOLOv8n | ONNX INT8 | 3.32 | 0.2545 | 1.23 | 1.29 |
+| YOLOv8s | PyTorch | 21.46 | 0.3555 | – | – |
+| YOLOv8s | ONNX FP32 | 42.69 | 0.3523 | 2.81 | 2.62 |
+| YOLOv8s | ONNX FP16 | 21.38 | 0.3491 | 2.82 | – |
+| YOLOv8s | ONNX INT8 | 10.96 | 0.3401 | 0.43 | 0.45 |
+
+### Neler öğrendik?
+
+1. **FP16, CPU tarafındaki en iyi dengedir.** YOLOv8n için model boyutunu yarıya indirir, anlamlı bir mAP kaybı yaşatmaz ve 1 iş parçacıklı testte verimi neredeyse iki katına çıkarır.
+2. **Küçük olmak her zaman daha hızlı anlamına gelmez.** INT8 modeli yaklaşık %72 küçültür ancak burada daha *yavaş* çalışır. Mevcut INT8 modelleri, CPU'daki evrişimli ağlar için uygun olmayan dinamik niceleme kullanmaktadır. Kalibre edilmiş **statik (QDQ) niceleme** ve TensorRT, planlanan çözümlerdir.
+3. **Asıl sorun küçük nesnelerdir.** Büyük nesneler için mAP50 **0.535** iken, küçük nesneler için bu değer sadece **0.168**'dir.
+
+| Nesne boyutu | mAP50 |
+|---|---:|
+| Büyük | 0.535 |
+| Küçük | 0.168 |
+
+Sınıf düzeyi ve ışık koşulu analizleri [`results/`](results/) dizininde bulunmaktadır.
+
+## 🏗️ Mimari
+
+```mermaid
+flowchart LR
+    U([Kullanıcı]) --> FE[React + TypeScript<br/>panel]
+    FE -->|HTTP| API[FastAPI arka uç]
+
+    subgraph Çıkarım
+        API --> PRE[Ön İşleme] --> ORT[ONNX Runtime<br/>YOLOv8] --> POST[Son İşleme + NMS]
+    end
+
+    POST --> API
+    API --> DB[(PostgreSQL)]
+    API -->|takip| ML[MLflow]
+    ML --> DB
+    PROM[Prometheus] -->|/metrics okur| API
+    GRAF[Grafana] --> PROM
+```
+
+### Depo Yapısı
+
+```text
+EdgeVision/
+├── src/
+│   ├── train.py              # eğitim
+│   ├── export_onnx.py        # ONNX dışa aktarma + niceleme
+│   ├── inference.py          # tekli görsel çıkarımı
+│   ├── video_inference.py    # video tespiti + FPS
+│   ├── benchmark.py          # FPS / gecikme / bellek
+│   └── api/main.py           # FastAPI servisi
+├── frontend/                 # React + TypeScript paneli
+├── mlflow/                   # MLflow imajı (PostgreSQL sürücüsü ekler)
+├── models/                   # indirilen ağırlıklar (git tarafından yok sayılır)
+├── results/                  # CSV sonuçları ve grafikler
+├── assets/                   # README görselleri
+├── tests/
+├── docker-compose.yml
+├── prometheus.yml
+├── download_models.py
+└── ARCHITECTURE.md
+```
+
+Dosya bazında açıklamalar için [ARCHITECTURE.md](ARCHITECTURE.md) ve daha detaylı bir rehber için [GETTING_STARTED.md](GETTING_STARTED.md) dosyalarına bakın.
+
+## ⚠️ Bilinen Sınırlamalar
+
+- Hız sonuçları CPU simülasyonlarıdır, Jetson Orin Nano ölçümleri **değildir**.
+- INT8 modelleri dinamik niceleme kullanır ve şu anda çıkarımı *yavaşlatmaktadır*.
+- SAHI / döşemeli çıkarım henüz API'ye entegre edilmemiştir.
+- Henüz TensorRT veya GPU kıyaslamaları yoktur.
+- Sadece YOLOv8n ve YOLOv8s değerlendirilmiştir.
+
+## 🗺️ Yol Haritası
+
+**Tamamlananlar**
+- [x] VisDrone üzerinde YOLOv8n/s eğitimi
+- [x] FP32, FP16 ve INT8 formatlarında ONNX dışa aktarma
+- [x] Sınıf düzeyi ve ışık analizi içeren kıyaslama paketi
+- [x] FastAPI servisi ve React paneli
+- [x] Docker Compose dağıtımı
+
+**Sıradakiler**
+- [ ] Gerçek Jetson Orin Nano donanımında kıyaslama (güç ve sıcaklık dahil)
+- [ ] TensorRT FP16 ve kalibre edilmiş INT8
+- [ ] Baş katmanları hariç tutularak statik INT8 niceleme (QDQ)
+- [ ] Her kıyaslama çalışmasını MLflow'a kaydetmek (parametreler, metrikler, eserler)
+- [ ] Doğruluk-gecikme Pareto eğrisi ile SAHI / uyarlanabilir döşeme
+- [ ] Küçük nesneler için daha yüksek giriş çözünürlüğü ve P2-başlık ablasyonları
+- [ ] Çıkarımı olay döngüsünden ayırmak (işçi havuzu) ve yük testleri eklemek
+- [ ] CI: lint, tip kontrolü, testler, imaj taraması ve niceleme kalite kapısı
+
+## 🤝 Katkıda Bulunma
+
+Sorunlar ve pull request'ler memnuniyetle karşılanır. Daha büyük değişiklikler için lütfen önce bir sorun (issue) açın.
+
+## 📄 Lisans
+
+[MIT Lisansı](LICENSE) altında yayınlanmıştır.
+
+## 🙏 Teşekkürler
+
+[Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics) · [VisDrone veri seti](https://github.com/VisDrone/VisDrone-Dataset) · [ONNX Runtime](https://onnxruntime.ai/)
