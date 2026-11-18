@@ -6,16 +6,14 @@ export default defineConfig({
   resolve: {
     dedupe: ['react', 'react-dom'],
   },
-  build: {
-    rollupOptions: {
-      // Anahtar: react-dom/client'ı harici olarak işaretle, Rollup ayrıştırmasın
-      external: ['react-dom/client'],
-    },
-  },
   server: {
     port: 3000,
     proxy: {
-      '/api': { target: 'http://localhost:8000', changeOrigin: true, rewrite: p => p.replace(/^\\/api/, '') },
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api/, ''),
+      },
     },
   },
 });
