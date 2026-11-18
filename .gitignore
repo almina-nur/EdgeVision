@@ -1,0 +1,15 @@
+datasets/
+data/
+runs/
+*.cache
+*.pyc
+__pycache__/
+.venv/
+venv/
+.ipynb_checkpoints/
+mlruns/
+node_modules/
+dist/
+build/
+.env
+.DS_Store

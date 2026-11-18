@@ -1,0 +1,11 @@
+class,mAP50,size_group,instances
+pedestrian,0.28,small-medium,8844
+people,0.218,small,5125
+bicycle,0.052,small,1287
+car,0.699,large,14064
+van,0.313,medium,1975
+truck,0.254,medium,750
+tricycle,0.19,small,1045
+awning-tricycle,0.092,small,532
+bus,0.37,large,251
+motor,0.287,small,4886
