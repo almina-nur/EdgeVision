@@ -34,6 +34,7 @@ function App() {
   const [imageUrl, setImageUrl] = useState<string>('');
   const [prediction, setPrediction] = useState<Prediction | null>(null);
   const [loading, setLoading] = useState(false);
+  const [apiKey, setApiKey] = useState('');
   const [error, setError] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'detect' | 'stats'>('detect');
 
@@ -47,14 +48,18 @@ function App() {
 
   // "Tespit Et" butonuna basıldığında API'ye istek atar
   const handlePredict = async () => {
-    if (!imageFile) return;
+    if (!imageFile || !apiKey.trim()) return;
     setLoading(true);
     setError('');
     try {
       const formData = new FormData();
       formData.append('file', imageFile);
       
-      const res = await fetch('/api/predict', { method: 'POST', body: formData });
+      const res = await fetch('/api/predict', {
+        method: 'POST',
+        headers: { 'X-API-Key': apiKey.trim() },
+        body: formData,
+      });
       if (!res.ok) throw new Error(`Sunucu Hatası: HTTP ${res.status}`);
       
       const data = await res.json();
@@ -109,10 +114,20 @@ function App() {
 
           {imageUrl && (
             <div style={{ marginTop: 16 }}>
-              <button onClick={handlePredict} disabled={loading} style={{
-                padding: '10px 20px', background: loading ? '#475569' : '#3b82f6',
+              <label htmlFor="api-key" style={{ display: 'block', marginBottom: 8 }}>
+                API anahtarı
+              </label>
+              <input
+                id="api-key"
+                type="password"
+                value={apiKey}
+                onChange={(event) => setApiKey(event.target.value)}
+                style={{ marginRight: 8, padding: '8px 12px' }}
+              />
+              <button onClick={handlePredict} disabled={loading || !apiKey.trim()} style={{
+                padding: '10px 20px', background: loading || !apiKey.trim() ? '#475569' : '#3b82f6',
                 color: 'white', border: 'none', borderRadius: 6,
-                cursor: loading ? 'not-allowed' : 'pointer', fontSize: 14,
+                cursor: loading || !apiKey.trim() ? 'not-allowed' : 'pointer', fontSize: 14,
               }}>
                 {loading ? 'Tespit ediliyor...' : 'Tespit Et'}
               </button>

@@ -1,0 +1,9 @@
+FROM python:3.11-slim-bookworm
+
+RUN pip install --no-cache-dir mlflow==2.10.0 psycopg2-binary==2.9.9 \
+    && useradd -m -u 1001 mlflow \
+    && mkdir -p /mlflow/artifacts \
+    && chown -R mlflow:mlflow /mlflow
+
+USER mlflow
+EXPOSE 5000

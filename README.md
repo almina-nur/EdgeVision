@@ -55,7 +55,7 @@ cp .env.example .env        # then edit the passwords
 python download_models.py
 
 # 4. Launch everything
-docker compose up --build
+docker compose up --build --wait
 ```
 
 | Service | URL |
@@ -68,6 +68,8 @@ docker compose up --build
 | MLflow | http://localhost:5000 |
 | Prometheus | http://localhost:9090 |
 | Grafana | http://localhost:3001 |
+
+Enter the API key in the dashboard before running a detection. For local development, the Compose default is `edgevision-secret-key`. Set `EDGEVISION_API_KEY` in your environment or `.env` file to use a different key.
 
 Stop with `docker compose down` (add `-v` to also delete volumes).
 

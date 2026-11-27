@@ -11,14 +11,16 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 10
     restart: unless-stopped
 
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.10.0
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
     container_name: edgevision-mlflow
     ports:
       - "5000:5000"
@@ -27,7 +29,12 @@ services:
       MLFLOW_DEFAULT_ARTIFACT_ROOT: /mlflow/artifacts
     volumes:
       - mlflow_artifacts:/mlflow/artifacts
-    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri postgresql://edgevision:edgevision@postgres:5432/edgevision --default-artifact-root /mlflow/artifacts
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri postgresql://edgevision:edgevision@postgres:5432/edgevision --artifacts-destination /mlflow/artifacts
+    healthcheck:
+      test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://127.0.0.1:5000/health', timeout=4).close()"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
     depends_on:
       postgres:
         condition: service_healthy
@@ -40,6 +47,8 @@ services:
     container_name: edgevision-backend
     ports:
       - "8000:8000"
+    environment:
+      API_KEY: ${EDGEVISION_API_KEY:-edgevision-secret-key}
     volumes:
       - ./models:/app/models:ro
     depends_on:
@@ -55,7 +64,8 @@ services:
     ports:
       - "3000:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
 
   prometheus:

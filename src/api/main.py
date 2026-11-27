@@ -10,7 +10,7 @@ import cv2
 import numpy as np
 from fastapi import FastAPI, File, HTTPException, UploadFile, Response, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
-from prometheus_client import generate_latest, Counter, Histogram
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest, Counter, Histogram
 
 from .model_loader import DetectionModel
 from .schemas import PredictionResponse
@@ -46,7 +46,7 @@ def health():
 
 @app.get("/metrics")
 def metrics():
-    return Response(content=generate_latest(), media_type="text/plain")
+    return Response(content=generate_latest(), headers={"Content-Type": CONTENT_TYPE_LATEST})
 
 @app.post("/predict", response_model=PredictionResponse, dependencies=[Depends(verify_api_key)])
 async def predict(file: UploadFile = File(...)):
