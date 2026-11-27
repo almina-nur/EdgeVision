@@ -76,7 +76,7 @@ Stop with `docker compose down` (add `-v` to also delete volumes).
 
 | Variable | Purpose | Default |
 |---|---|---|
-| `MODEL_PATH` | ONNX model served by the API | `models/yolov8n_fp16.onnx` |
+| `MODEL_PATH` | ONNX model served by the API | `models/yolov8n_fp32.onnx` |
 | `DATABASE_URL` | PostgreSQL connection string | built from `.env` |
 | `MLFLOW_TRACKING_URI` | MLflow tracking server | `http://mlflow:5000` |
 | `POSTGRES_PASSWORD` | Database password | **required** |

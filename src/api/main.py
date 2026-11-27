@@ -16,7 +16,7 @@ from .model_loader import DetectionModel
 from .schemas import PredictionResponse
 from .database import SessionLocal, PredictionLog
 
-MODEL_PATH = os.getenv("MODEL_PATH", "models/yolov8n_fp16.onnx")
+MODEL_PATH = os.getenv("MODEL_PATH", "models/yolov8n_fp32.onnx")
 API_KEY = os.getenv("API_KEY", "edgevision-secret-key")
 model = None
 

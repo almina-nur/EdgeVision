@@ -68,9 +68,11 @@ class DetectionModel:
         boxes_xyxy[:, [0, 2]] = (boxes_xyxy[:, [0, 2]] - dx) / scale
         boxes_xyxy[:, [1, 3]] = (boxes_xyxy[:, [1, 3]] - dy) / scale
 
-        # Non-Maximum Suppression (NMS)
+        # OpenCV NMS kutuları (sol, üst, genişlik, yükseklik) biçiminde bekler.
+        boxes_tlwh = boxes_xyxy.copy()
+        boxes_tlwh[:, 2:] -= boxes_tlwh[:, :2]
         indices = cv2.dnn.NMSBoxes(
-            boxes_xyxy.tolist(), confidences.tolist(),
+            boxes_tlwh.tolist(), confidences.tolist(),
             self.conf_threshold, self.iou_threshold,
         )
         
