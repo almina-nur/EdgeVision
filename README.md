@@ -48,13 +48,10 @@ EdgeVision is an engineering study of that gap. Instead of only chasing mAP on [
 git clone https://github.com/almina-nur/EdgeVision.git
 cd EdgeVision
 
-# 2. Configure secrets (never commit .env)
-cp .env.example .env        # then edit the passwords
-
-# 3. Download trained models from the v0.1.0 release
+# 2. Download trained models from the v0.1.0 release
 python download_models.py
 
-# 4. Launch everything
+# 3. Launch everything
 docker compose up --build --wait
 ```
 
@@ -79,10 +76,8 @@ Stop with `docker compose down` (add `-v` to also delete volumes).
 | Variable | Purpose | Default |
 |---|---|---|
 | `MODEL_PATH` | ONNX model served by the API | `models/yolov8n_fp32.onnx` |
-| `DATABASE_URL` | PostgreSQL connection string | built from `.env` |
-| `MLFLOW_TRACKING_URI` | MLflow tracking server | `http://mlflow:5000` |
-| `POSTGRES_PASSWORD` | Database password | **required** |
-| `GRAFANA_PASSWORD` | Grafana admin password | **required** |
+| `DATABASE_URL` | PostgreSQL connection string used by the API | The local Compose PostgreSQL service |
+| `EDGEVISION_API_KEY` | API key passed to the backend by Compose | `edgevision-secret-key` |
 
 To download the VisDrone dataset as well: `python download_models.py --all`
 

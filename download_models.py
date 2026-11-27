@@ -7,6 +7,7 @@ Kullanım:
 import argparse
 import os
 import sys
+import tempfile
 import urllib.request
 
 MODELS_DIR = "models"
@@ -20,22 +21,40 @@ MODEL_URLS = {
 }
 
 
+def has_model_file(path):
+    try:
+        with open(path, "rb") as model:
+            prefix = model.read(64)
+    except FileNotFoundError:
+        return False
+    return bool(prefix) and not prefix.startswith(b"version https://git-lfs.github.com/spec/v1")
+
+
 def download_file(url, dest):
-    """Dosyayı indir; zaten varsa atla."""
-    if os.path.exists(dest) and os.path.getsize(dest) > 0:
+    """Modeli indir; yerelde gerçek model dosyası varsa atla."""
+    if has_model_file(dest):
         size_mb = os.path.getsize(dest) / (1024 * 1024)
         print(f"  ✓ {os.path.basename(dest)} zaten var ({size_mb:.2f} MB)")
         return True
 
     print(f"  ↓ İndiriliyor: {os.path.basename(dest)}")
+    temp_path = None
     try:
-        urllib.request.urlretrieve(url, dest)
+        with tempfile.NamedTemporaryFile(dir=os.path.dirname(os.path.abspath(dest)), delete=False) as temp:
+            temp_path = temp.name
+        urllib.request.urlretrieve(url, temp_path)
+        if not has_model_file(temp_path):
+            raise ValueError("İndirilen dosya model içermiyor.")
+        os.replace(temp_path, dest)
         size_mb = os.path.getsize(dest) / (1024 * 1024)
         print(f"  ✓ Tamamlandı ({size_mb:.2f} MB)")
         return True
     except Exception as e:
         print(f"  ✗ Hata: {e}")
         return False
+    finally:
+        if temp_path is not None and os.path.exists(temp_path):
+            os.remove(temp_path)
 
 
 def download_models():

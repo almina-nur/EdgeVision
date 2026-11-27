@@ -13,9 +13,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Download the default ONNX model
         run: |
-          curl --fail --silent --show-error --location --retry 3 \
-            https://github.com/almina-nur/EdgeVision/releases/download/v0.1.0/yolov8n_fp32.onnx \
-            --output models/yolov8n_fp32.onnx
+          python3 - <<'PY'
+          from download_models import MODEL_URLS, download_file
+
+          name = "yolov8n_fp32.onnx"
+          assert download_file(MODEL_URLS[name], f"models/{name}")
+          PY
 
       - name: Build and start services
         env:
